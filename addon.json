@@ -1,0 +1,14 @@
+{
+	"title"		:	"[TTT2] Symbiote [ROLE]",
+	"type"		:	"ServerContent",
+    "tags"		:	[ "roleplay", "fun" ],
+    "ignore"    : [
+        ".git/*",
+        ".gitignore",
+        "README.md",
+        "ttt2-role_symb.jpg",
+        "ttt2-role_symb.png",
+        "ttt2-role_symb.txt",
+        "test_notes.txt"
+    ]
+}
