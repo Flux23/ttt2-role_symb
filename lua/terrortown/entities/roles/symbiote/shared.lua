@@ -61,6 +61,18 @@ function ROLE:PreInitialize()
 	}
 end
 
+local function IsInSpecDM(ply)
+    if SpecDM and (ply.IsGhost and ply:IsGhost()) then
+        return true
+    end
+    
+    return false
+end
+
+local function SymbCanBond(ply)
+	return true
+end
+
 if SERVER then
 	local function ResetSymbioteForServer()
 		--TODO
@@ -73,9 +85,6 @@ if SERVER then
 		--	end
 		--end
 	end
-	hook.Add("TTTPrepareRound", "TTTPrepareRoundSymbioteForServer", ResetSymbioteForServer)
-	hook.Add("TTTBeginRound", "TTTBeginRoundSymbioteForServer", ResetSymbioteForServer)
-	hook.Add("TTTEndRound", "TTTEndRoundSymbioteForServer", ResetSymbioteForServer)
 	
 	function ROLE:GiveRoleLoadout(ply, isRoleChange)
 		--TODO
@@ -95,8 +104,24 @@ if SERVER then
 		----Needed in case someone becomes a Copycat in the middle of a round.
 		--COPYCAT_DATA.InitCCFilesForPly(ply)
 	end
-end
 
+	hook.Add("EntityTakeDamage", "EntityTakeDamageSymb", 
+		function(target, dmg_info)
+			local attacker = dmg_info:GetAttacker()
+			
+			if IsValid(attacker) and attacker:IsPlayer() and attacker:GetSubRole() == ROLE_SYMBIOTE	and not IsInSpecDM(attacker) then 
+				if not SymbCanBond(attacker) then
+					dmg_info:SetDamage(dmg_info:GetDamage() * GetConVar("ttt2_symbiote_spite_multi"):GetFloat())
+				else 
+					dmg_info:SetDamage(0)
+				end
+			end
+		end)
+	hook.Add("TTTPrepareRound", "TTTPrepareRoundSymbioteForServer", ResetSymbioteForServer)
+	hook.Add("TTTBeginRound", "TTTBeginRoundSymbioteForServer", ResetSymbioteForServer)
+	hook.Add("TTTEndRound", "TTTEndRoundSymbioteForServer", ResetSymbioteForServer)
+
+end
 if CLIENT then
 	local function ResetSymbioteForClient()
 		--TODO
