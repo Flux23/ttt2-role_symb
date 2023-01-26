@@ -69,48 +69,47 @@ local function IsInSpecDM(ply)
     return false
 end
 
-local function SymbCanBond(ply)
+local function _SymbCanBond(ply)
 	return true
 end
 
 if SERVER then
 	local function ResetSymbioteForServer()
-		--TODO
-		--COPYCAT_DATA.ResetCCFilesDataForServer()
-		--
-		--for _, ply in ipairs(player.GetAll()) do
-		--	--Don't reset was_copycat at start of round if the player is a copycat, as that will overwrite the logic in GiveRoleLoadout.
-		--	if GetRoundState() == ROUND_POST or ply:GetSubRole() ~= ROLE_COPYCAT then
-		--		ply.was_copycat = nil
-		--	end
-		--end
+		for _, ply in ipairs(player.GetAll()) do
+			SYMB_BOND_DATA.InitSymbBondDataForPly(ply)
+		end
 	end
 	
 	function ROLE:GiveRoleLoadout(ply, isRoleChange)
-		--TODO
-		----The Copycat should hold onto their files for as long as possible, as they are used for role switches.
-		----The Copycat will hold onto this item even if they switch roles, as its primary use is to switch roles at will.
-		----  i.e. we do not strip this weapon on ROLE:RemoveRoleLoadout
-		--if not ply:HasWeapon("weapon_ttt2_copycat_files") then
-		--	ply:GiveEquipmentWeapon("weapon_ttt2_copycat_files")
-		--end
-		--
-		----If the Copycat were to switch to a revival role, die, and then revive, they will lose their copycat files unless we remember them.
-		----Upon becoming a Copycat, they will remain a Copycat. Unless their team changes. Or the game ends.
-		----In addition, helps differentiate a player who spawned as a Copycat and a player who happens to be on the Copycat's team (ex. Thrall, Bodyguard)
-		--ply.was_copycat = true
-		--
-		----Init Copycat Files here (function does nothing if they've already been initialized)
-		----Needed in case someone becomes a Copycat in the middle of a round.
-		--COPYCAT_DATA.InitCCFilesForPly(ply)
+		SYMB_BOND_DATA.InitSymbBondDataForPly(ply)
+		print("Giving weapons to symbiote")
+		if not ply:HasWeapon("weapon_ttt2_symbstick") then
+			ply:GiveEquipmentWeapon("weapon_ttt2_symbstick")
+			print("symbiote got a symbstick")
+		else
+			print("symbiote already has	a symbstick")
+		end
+
 	end
+
+	function ROLE:RemoveRoleLoadout(ply, isRoleChange)
+		print("Removing weapons from symbiote")
+		if ply:HasWeapon("weapon_ttt2_symbstick") then
+			ply:StripWeapon("weapon_ttt2_symbstick")
+			print("symbiote lost a symbstick")
+		else
+			print("symbiote already lost a symbstick")
+		end
+		
+	end
+
 
 	hook.Add("EntityTakeDamage", "EntityTakeDamageSymb", 
 		function(target, dmg_info)
 			local attacker = dmg_info:GetAttacker()
 			
 			if IsValid(attacker) and attacker:IsPlayer() and attacker:GetSubRole() == ROLE_SYMBIOTE	and not IsInSpecDM(attacker) then 
-				if not SymbCanBond(attacker) then
+				if not _SymbCanBond(attacker) then
 					dmg_info:SetDamage(dmg_info:GetDamage() * GetConVar("ttt2_symbiote_spite_multi"):GetFloat())
 				else 
 					dmg_info:SetDamage(0)

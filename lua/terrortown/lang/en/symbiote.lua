@@ -16,6 +16,8 @@ L["ev_win_" .. TEAM_SYMBIOTE] = "The Symbiote won the round!"
 
 --SYMBIOTE ROLE STRINGS
 
+--SYMBIOTE ITEMS
+
 
 --EVENT STRINGS
 -- Need to be very specifically worded, due to how the system translates them.
